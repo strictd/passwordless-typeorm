@@ -1,4 +1,4 @@
-export declare class IPasswordlessTypeORM {
+export declare class Passwordless {
     uid: string;
     hashedToken: string;
     originUrl: string;

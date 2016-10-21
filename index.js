@@ -1,3 +1,4 @@
 'use strict';
 
-module.exports = require('./lib/typeormstore.js');
+let TypeORMStore = require('./lib/typeormstore.js');
+module.exports.TypeORMStore = TypeORMStore.TypeORMStore;

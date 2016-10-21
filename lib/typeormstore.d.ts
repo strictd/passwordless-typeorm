@@ -1,6 +1,6 @@
 /// <reference types="node" />
 import { DriverOptions } from 'typeorm';
-export declare class PasswordlessTypeORM {
+export declare class TypeORMStore {
     dbConn: string;
     constructor(dbDriver?: DriverOptions, dbConn?: string);
     /**

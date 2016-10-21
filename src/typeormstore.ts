@@ -2,9 +2,9 @@ import { createConnection, ConnectionOptions, DriverOptions, getConnectionManage
 import { hash, compare } from 'bcrypt';
 import { authenticate, storeOrUpdate, invalidateUser, clear, length } from
     'passwordless-tokenstore';
-import { IPasswordlessTypeORM } from './passwordless-typeorm';
+import { Passwordless } from './passwordless';
 
-export class PasswordlessTypeORM {
+export class TypeORMStore {
   dbConn: string;
 
   constructor(dbDriver?: DriverOptions, dbConn?: string) {
@@ -13,9 +13,9 @@ export class PasswordlessTypeORM {
     } else {
       createConnection({
         driver: dbDriver,
-        entities: [IPasswordlessTypeORM],
+        entities: [Passwordless],
         autoSchemaSync: true
-      }).then(() => this.dbConn = 'default');
+      }).then(() => { this.dbConn = 'default'; });
     }
   }
 
@@ -39,12 +39,12 @@ export class PasswordlessTypeORM {
     if (!this.dbConn) { throw new Error('No Connection'); }
 
     let connection = getConnectionManager().get(this.dbConn);
-    let repository = connection.getRepository(IPasswordlessTypeORM);
+    let repository = connection.getRepository(Passwordless);
     repository.createQueryBuilder("passwordless")
     .where("uid = :uid", {uid: uid})
     .where("ttl > :ttl", { ttl: new Date() })
     .getResults()
-    .then((item: IPasswordlessTypeORM[]) => {
+    .then((item: Passwordless[]) => {
       if(item.length) {
         compare(token, item[0].hashedToken, function(err, res) {
           if(err) {
@@ -81,18 +81,18 @@ export class PasswordlessTypeORM {
     if (!this.dbConn) { throw new Error('No Connection'); }
 
     let connection = getConnectionManager().get(this.dbConn);
-    let repository = connection.getRepository(IPasswordlessTypeORM);
+    let repository = connection.getRepository(Passwordless);
     hash(token, 10, (err, hashedToken) => {
       if (err) { return callback(err); }
-      let newRecord = new IPasswordlessTypeORM();
+      let newRecord = new Passwordless();
       newRecord.hashedToken = hashedToken;
       newRecord.uid = uid;
       newRecord.ttl = (new Date(Date.now() + msToLive).getTime() / 1000);
-      newRecord.originUrl = originUrl;
+      newRecord.originUrl = originUrl || '';
 
       connection.entityManager.persist(newRecord).
-        then(() => callback()).
-        catch((err: Error) => callback(err)); 
+        then(() => { callback(); }).
+        catch((err: Error) => { callback(err); }); 
     });
   }
 
@@ -109,11 +109,11 @@ export class PasswordlessTypeORM {
     if (!this.dbConn) { throw new Error('No Connection'); }
     
     let connection = getConnectionManager().get(this.dbConn);
-    let repository = connection.getRepository(IPasswordlessTypeORM);
+    let repository = connection.getRepository(Passwordless);
     repository.findOne({uid: uid}).then((resp: any) =>
       repository.remove(resp).
-        then(() => callback()).
-        catch((err: Error) => callback(err))
+        then(() => { callback(); }).
+        catch((err: Error) => { callback(err); })
     )
   }
 
@@ -129,11 +129,11 @@ export class PasswordlessTypeORM {
     if (!this.dbConn) { throw new Error('No Connection'); }
 
     let connection = getConnectionManager().get(this.dbConn);
-    let repository = connection.getRepository(IPasswordlessTypeORM);
+    let repository = connection.getRepository(Passwordless);
     repository.find().then((resp: any) =>
       resp.remove().
-        then(() => callback()).
-        catch((err: Error) => callback(err))
+        then(() => { callback(); }).
+        catch((err: Error) => { callback(err); })
     );
   }
 
@@ -146,9 +146,9 @@ export class PasswordlessTypeORM {
     if (!this.dbConn) { throw new Error('No Connection'); }
 
     let connection = getConnectionManager().get(this.dbConn);
-    let repository = connection.getRepository(IPasswordlessTypeORM);
-    repository.find().then((res: IPasswordlessTypeORM[]) => {
+    let repository = connection.getRepository(Passwordless);
+    repository.find().then((res: Passwordless[]) => {
       callback(null, res.length);
-    }).catch((err: Error) => callback(err));
+    }).catch((err: Error) => { callback(err); });
   }
 }

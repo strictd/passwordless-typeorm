@@ -5,10 +5,12 @@
     "outDir": "./lib",
     "target": "es5",
     "noImplicitAny": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "index.d.ts"
   ],
   "compileOnSave": false,
   "atom": {

@@ -7,12 +7,12 @@
     "test": "grunt test"
   },
   "dependencies": {
-    "bcrypt": "^0.8.7",
+    "bcryptjs": "^2.3.0",
     "passwordless-tokenstore": "0.0.10",
-    "typeorm": "0.0.2-alpha.69"
+    "typeorm": "^0.0.2-alpha.69"
   },
   "devDependencies": {
-    "@types/bcrypt": "0.0.30",
+    "@types/bcryptjs": "^2.3.30",
     "@types/core-js": "^0.9.34",
     "chai": "~3.0.0",
     "chance": "^0.7.6",

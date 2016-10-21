@@ -1,5 +1,5 @@
 import { createConnection, ConnectionOptions, DriverOptions, getConnectionManager } from 'typeorm';
-import { hash, compare } from 'bcrypt';
+import { hash, compare } from 'bcryptjs';
 import { authenticate, storeOrUpdate, invalidateUser, clear, length } from
     'passwordless-tokenstore';
 import { Passwordless } from './passwordless';

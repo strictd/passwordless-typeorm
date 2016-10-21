@@ -1,7 +1,8 @@
 /// <reference types="node" />
 import { DriverOptions } from 'typeorm';
 export declare class PasswordlessTypeORM {
-    constructor(dbDriver: DriverOptions);
+    dbConn: string;
+    constructor(dbDriver?: DriverOptions, dbConn?: string);
     /**
      * Checks if the provided token / user id combination exists and is
      * valid in terms of time-to-live. If yes, the method provides the

@@ -5,14 +5,18 @@ import { authenticate, storeOrUpdate, invalidateUser, clear, length } from
 import { IPasswordlessTypeORM } from './passwordless-typeorm';
 
 export class PasswordlessTypeORM {
+  dbConn: string;
 
-  constructor(dbDriver: DriverOptions) {
-    /* let dbDriver: DriverOptions = <DriverOptions>{ type: "mysql", host: "localhost", port: 3306, username: "root", password: "admin", database: "test"}; */
-    createConnection({
-      driver: dbDriver,
-      entities: [IPasswordlessTypeORM],
-      autoSchemaSync: true
-    });
+  constructor(dbDriver?: DriverOptions, dbConn?: string) {
+    if (dbConn) {
+      this.dbConn = dbConn;
+    } else {
+      createConnection({
+        driver: dbDriver,
+        entities: [IPasswordlessTypeORM],
+        autoSchemaSync: true
+      }).then(() => this.dbConn = 'default');
+    }
   }
 
   /**
@@ -32,8 +36,9 @@ export class PasswordlessTypeORM {
     if(!token || !uid || !callback) {
       throw new Error('TokenStore:authenticate called with invalid parameters');
     }
+    if (!this.dbConn) { throw new Error('No Connection'); }
 
-    let connection = getConnectionManager().get();
+    let connection = getConnectionManager().get(this.dbConn);
     let repository = connection.getRepository(IPasswordlessTypeORM);
     repository.createQueryBuilder("passwordless")
     .where("uid = :uid", {uid: uid})
@@ -73,8 +78,9 @@ export class PasswordlessTypeORM {
     if(!token || !uid || !msToLive || !callback) {
       throw new Error('TokenStore:storeOrUpdate called with invalid parameters');
     }
+    if (!this.dbConn) { throw new Error('No Connection'); }
 
-    let connection = getConnectionManager().get();
+    let connection = getConnectionManager().get(this.dbConn);
     let repository = connection.getRepository(IPasswordlessTypeORM);
     hash(token, 10, (err, hashedToken) => {
       if (err) { return callback(err); }
@@ -100,8 +106,9 @@ export class PasswordlessTypeORM {
     if(!uid || !callback) {
       throw new Error('TokenStore:invalidateUser called with invalid parameters');
     }
+    if (!this.dbConn) { throw new Error('No Connection'); }
     
-    let connection = getConnectionManager().get();
+    let connection = getConnectionManager().get(this.dbConn);
     let repository = connection.getRepository(IPasswordlessTypeORM);
     repository.findOne({uid: uid}).then((resp: any) =>
       repository.remove(resp).
@@ -119,7 +126,9 @@ export class PasswordlessTypeORM {
     if(!callback) {
       throw new Error('TokenStore:clear called with invalid parameters');
     }
-    let connection = getConnectionManager().get();
+    if (!this.dbConn) { throw new Error('No Connection'); }
+
+    let connection = getConnectionManager().get(this.dbConn);
     let repository = connection.getRepository(IPasswordlessTypeORM);
     repository.find().then((resp: any) =>
       resp.remove().
@@ -134,7 +143,9 @@ export class PasswordlessTypeORM {
    * of success or with callback(error) in case of an error
    */
   public length(callback: (err?: Error, count?: number) => void): void {
-    let connection = getConnectionManager().get();
+    if (!this.dbConn) { throw new Error('No Connection'); }
+
+    let connection = getConnectionManager().get(this.dbConn);
     let repository = connection.getRepository(IPasswordlessTypeORM);
     repository.find().then((res: IPasswordlessTypeORM[]) => {
       callback(null, res.length);
